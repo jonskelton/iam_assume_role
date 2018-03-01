@@ -1,0 +1,55 @@
+Description: "Group definitions for granting access to managed account Roles"
+Parameters:
+  ExecutorAccountId:
+    Type: "String"
+    Default: "0123456789"
+  ExecutorAccountName:
+    Type: "String"
+    Default: "executor-0"
+  ManagedAccountId:
+    Type: "9876543210"
+  ManagedAccountName:
+    Type: "managed-0"
+
+Resources:
+  ReadOnly:
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName: !Sub "${ManagedAccountName}.ReadOnly"
+      Path: "/"
+      Policies: 
+      - PolicyName: !Sub "${ManagedAccountName}.ReadOnly"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Resource:
+            - !Sub "arn:aws:iam::${ManagedAccountId}:role/ReadOnly"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 32400
+
+  Admin:
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName: !Sub "${ManagedAccountName}.Admin"
+      Path: "/"
+      Policies: 
+      - PolicyName: !Sub "${ManagedAccountName}.Admin"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Resource:
+            - !Sub "arn:aws:iam::${ManagedAccountId}:role/Admin"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 7200

@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Grants standard set of AssumeRole permissions for managed accounts"
+
+Parameters:
+  ExecutorAccountId:
+    Type: "String"
+    Default: "0123456789"
+  ExecutorAccountName:
+    Type: "String"
+    Default: "executor-0"
+
+Resources:
+  ReadOnlyAccess:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "ReadOnly"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/ReadOnlyAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+            Action:
+              - "sts:AssumeRole"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 32400
+
+  AdminAccess:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "Admin"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+            Action:
+              - "sts:AssumeRole"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 7200
