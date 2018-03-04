@@ -1,15 +1,11 @@
 Description: "Group definitions for granting access to managed account Roles"
 Parameters:
-  ExecutorAccountId:
-    Type: "String"
-    Default: "0123456789"
-  ExecutorAccountName:
-    Type: "String"
-    Default: "executor-0"
   ManagedAccountId:
-    Type: "9876543210"
+    Type: "String"
+    Default: "9876543210"
   ManagedAccountName:
-    Type: "managed-0"
+    Type: "String"
+    Default: "managed-0"
 
 Resources:
   ReadOnly:

@@ -1,0 +1,43 @@
+Description: "Defines group for MFA self-management: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_delegate-permissions_examples.html"
+
+Resources:
+  IAMSelfManagement:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "IAMSelfManagement"
+      Path: "/"
+      Policies:
+      - PolicyName: "IAMSelfManagement"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Sid: "AllowUsersToCreateEnableResyncDeleteTheirOwnVirtualMFADevice"
+            Effect: "Allow"
+            Action:
+            - "iam:CreateVirtualMFADevice"
+            - "iam:EnableMFADevice"
+            - "iam:ResyncMFADevice"
+            - "iam:DeleteVirtualMFADevice"
+            - "iam:GetUser"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+
+          - Sid: "AllowUsersToDeactivateTheirOwnVirtualMFADevice"
+            Effect: "Allow"
+            Action:
+            - "iam:DeactivateMFADevice"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowUsersToListMFADevicesandUsersForConsole"
+            Effect: "Allow"
+            Action:
+            - "iam:ListMFADevices"
+            - "iam:ListVirtualMFADevices"
+            - "iam:ListUsers"
+            Resource: "*"
