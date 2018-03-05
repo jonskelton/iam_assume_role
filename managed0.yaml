@@ -6,9 +6,6 @@ Parameters:
   ExecutorAccountId:
     Type: "String"
     Default: "0123456789"
-  ExecutorAccountName:
-    Type: "String"
-    Default: "executor-0"
 
 Resources:
   ReadOnlyAccess:
