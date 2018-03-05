@@ -1,32 +1,37 @@
 Description: "Defines group for MFA self-management: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_delegate-permissions_examples.html"
 
 Resources:
-  IAMSelfManagement:
+  IAMSelfManagementGroup:
     Type: "AWS::IAM::Group"
     Properties:
       GroupName: "IAMSelfManagement"
       Path: "/"
-      Policies:
-      - PolicyName: "IAMSelfManagement"
+      ManagedPolicyArns:
+      - !Ref "IAMSelfManagementPolicy"
+
+  IAMSelfManagementPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+        ManagedPolicyName: "IAMSelfManagement"
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
-          - Sid: "AllowUsersToCreateEnableResyncDeleteTheirOwnVirtualMFADevice"
+          - Sid: "AllowUsersToCreateEnableResyncTheirOwnVirtualMFADevice"
             Effect: "Allow"
             Action:
             - "iam:CreateVirtualMFADevice"
             - "iam:EnableMFADevice"
             - "iam:ResyncMFADevice"
-            - "iam:DeleteVirtualMFADevice"
             - "iam:GetUser"
             Resource:
             - !Sub "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
             - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
 
-          - Sid: "AllowUsersToDeactivateTheirOwnVirtualMFADevice"
+          - Sid: "AllowUsersToDeactivateDeleteTheirOwnVirtualMFADevice"
             Effect: "Allow"
             Action:
             - "iam:DeactivateMFADevice"
+            - "iam:DeleteVirtualMFADevice"
             Resource:
             - !Sub "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
             - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
@@ -41,3 +46,16 @@ Resources:
             - "iam:ListVirtualMFADevices"
             - "iam:ListUsers"
             Resource: "*"
+
+          - Sid: "AllowMFAdUsersManageAccessKeys"
+            Effect: "Allow"
+            Action:
+            - "iam:DeleteAccessKey"
+            - "iam:UpdateAccessKey"
+            - "iam:CreateAccessKey"
+            - "iam:ListAccessKeys"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
