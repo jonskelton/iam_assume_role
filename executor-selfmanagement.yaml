@@ -59,3 +59,20 @@ Resources:
             Condition:
               Bool:
                 "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowUserToGetAccountPasswordPolicy"
+            Effect: "Allow"
+            Action:
+            - "iam:GetAccountPasswordPolicy"
+            Resource: "*"
+
+          - Sid: "AllowMFAdUserToChangeTheirPassword"
+            Effect: "Allow"
+            Action:
+            - "iam:ChangePassword"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
