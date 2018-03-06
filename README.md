@@ -8,6 +8,25 @@ Download the assume-role  utility: https://raw.githubusercontent.com/jonskelton/
 
 Review documentation: https://github.berkeley.edu/ist-api-eis/coinbase_assume-role
 
+Account configuration:
+
+~/.aws/accounts
+```{r, engine='json', count_lines}
+{
+    "executor-0": 0123456789
+    "managed-0": 9876543210
+}
+```
+
+Credential configuration:
+
+~/.aws/credentials:
+```
+[default]
+aws_access_key_id = AKIADEMODEMODEMO
+aws_secret_key_key = sanitizedkeysanitizedkeysanitizedkey
+```
+
 Bash prompt via ~/.bashrc:
 
 ```{r, engine='bash', count_lines}
