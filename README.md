@@ -39,12 +39,12 @@ PROMPT_COMMAND='aws_account_info'
 Bash function wrapper example:
 
 ```{r, engine='bash', count_lines}
-function example-role-name@example-account-alias() {
-    eval $(assume-role example-account-alias example-role-name $1)
+function admin@managed-0() {
+    eval $(assume-role managed-0 Admin $1)
 }
 
-$ example-role-name@example-account-alias 6DIGITMFACODE
+$ admin@managed-0 6DIGITMFACODE
 Success! IAM session envars are exported.
-aws:(example-role-name@example-account-alias) 
+aws:(Admin@managed-0) 
 $ 
 ```
