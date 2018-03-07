@@ -75,4 +75,3 @@ Resources:
             Condition:
               Bool:
                 "aws:MultiFactorAuthPresent": "True"
-
