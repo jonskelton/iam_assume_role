@@ -6,7 +6,7 @@ Overview Diagram:
 
 Download the assume-role  utility: https://raw.githubusercontent.com/jonskelton/assume-role/master/assume-role
 
-Review documentation: https://github.berkeley.edu/ist-api-eis/coinbase_assume-role
+Review documentation: https://github.com/coinbase/assume-role
 
 Account configuration:
 
