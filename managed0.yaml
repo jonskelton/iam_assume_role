@@ -14,7 +14,7 @@ Resources:
       RoleName: "ReadOnly"
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/ViewOnlyAccess"
+        - "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -39,3 +39,9 @@ Resources:
               "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
             Action:
               - "sts:AssumeRole"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 7200
