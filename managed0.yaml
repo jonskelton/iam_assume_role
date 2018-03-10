@@ -23,12 +23,6 @@ Resources:
               "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
             Action:
               - "sts:AssumeRole"
-            Condition:
-              Bool:
-                aws:SecureTransport: True
-                aws:MultiFactorAuthPresent: True
-              NumericLessThan:
-                aws:MultiFactorAuthAge: 32400
 
   AdminAccess:
     Type: "AWS::IAM::Role"
@@ -45,9 +39,3 @@ Resources:
               "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
             Action:
               - "sts:AssumeRole"
-            Condition:
-              Bool:
-                aws:SecureTransport: True
-                aws:MultiFactorAuthPresent: True
-              NumericLessThan:
-                aws:MultiFactorAuthAge: 7200
