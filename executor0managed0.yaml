@@ -29,6 +29,24 @@ Resources:
               NumericLessThan:
                 aws:MultiFactorAuthAge: 32400
 
+  ReadOnlyApp:
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName: !Sub "${ManagedAccountName}.ReadOnlyApp"
+      Path: "/"
+      Policies: 
+      - PolicyName: !Sub "${ManagedAccountName}.ReadOnlyApp"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Resource:
+            - !Sub "arn:aws:iam::${ManagedAccountId}:role/ReadOnly"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+
   Admin:
     Type: "AWS::IAM::Group"
     Properties: 
