@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""
+    asmrl
+    ~~~~~
+
+    A utility to facilitate AWS IAM Assume Role from the command line.
+
+    :copyright: © 2018 Jon M. Skelton <https://keybase.io/jskelton>
+    :license: BDS, see LICENSE for mor details.
+"""
+
+from pathlib import Path
+
+import botocore
+import datetime
+import boto3
+import uuid
+import json
+import sys
+import os
+
+DEFAULT_REGION = 'us-west-2'
+DEFAULT_DURATION = 3600
+DEFAULT_STS_ENDPOINT = 'https://sts.us-west-2.amazonaws.com'
+
+LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+
+def resolve_config(config_alias):
+    homedir_path = Path(os.path.expanduser('~'))
+    configpath = homedir_path / '.aws' / 'asmrl.conf'
+
+    with configpath.open() as config_fd:
+        config_full = json.loads(config_fd.read())
+
+    config = {}
+    if 'defaults' in config_full:
+        config.update(config_full['defaults'])
+    config.update(config_full[config_alias])
+    return config
+
+def main(config_alias, mfa_code=None):
+    config = resolve_config(config_alias)
+
+    profile = 'default'
+    if 'profile' in config:
+        profile = config['profile']
+    if 'AWS_DEFAULT_PROFILE' in os.environ:
+        profile = os.environ['AWS_DEFAULT_PROFILE']
+
+    region = DEFAULT_REGION
+    if 'region' in config:
+        region = config['region']
+    if 'aws_DEFAULT_REGION' in os.environ:
+        region = os.environ['aws_DEFAULT_REGION']
+
+    sts_endpoint = DEFAULT_STS_ENDPOINT
+    if 'sts_endpoint' in config:
+        sts_endpoint = config['sts_endpoint']
+
+    role = config['role']
+
+    try:
+        credentials = assume_role(profile, role, mfa_code, region, str(uuid.uuid4()), sts_endpoint, DEFAULT_DURATION)
+    except botocore.exceptions.ProfileNotFound:
+        print(f"Unable to locate profile: {profile}", file=sys.stderr)
+        sys.exit(-1)
+    except botocore.exceptions.ClientError as bece:
+        print("Unable to assume role", file=sys.stderr)
+        print(bece, file=sys.stderr)
+        sys.exit(-1)
+    except RuntimeError as arre:
+        print("Unable to assume role", file=sys.stderr)
+        print(arre, file=sys.stderr)
+        sys.exit(-1)
+
+    print(f"export AWS_ACCESS_KEY_ID={credentials['AccessKeyId']}")
+    print(f"export AWS_SECRET_ACCESS_KEY={credentials['SecretAccessKey']}")
+    print(f"export AWS_SESSION_TOKEN={credentials['SessionToken']}")
+    print(f"export ROLE_ASSUMED={role}")
+    print(f"export ROLE_ASSUMED_UNTIL={str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).time())}")
+    print(f"export ROLE_ALIAS={config_alias}")
+
+def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
+    os.environ.pop('AWS_ACCESS_KEY_ID', None)
+    os.environ.pop('AWS_SECRET_ACCESS_KEY', None)
+    os.environ.pop('AWS_SESSION_TOKEN', None)
+
+    session = boto3.session.Session(profile_name=profile,
+                                    region_name=region)
+    iam = session.client('iam')
+
+    mfa_device = None
+
+    if mfa_code:
+        response = iam.list_mfa_devices()
+
+        if not response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            raise RuntimeError(f"HTTP code {response['ResponseMetadata']['HTTPStatusCode']} "
+                               "listing MFA devices")
+        if not 'MFADevices' in response:
+            raise RuntimeError("No MFA Device found")
+        if len(response['MFADevices']) > 1:
+            raise RuntimeError("Multiple MFA Devices not supported")
+
+        mfa_device = response['MFADevices'][0]
+
+    sts = session.client('sts', endpoint_url=sts_endpoint)
+
+    assume_role_args = {
+        'RoleArn': role_arn,
+        'RoleSessionName': role_session_name,
+        'DurationSeconds': duration
+    }
+    if mfa_device and mfa_code:
+        assume_role_args['TokenCode'] = mfa_code
+        assume_role_args['SerialNumber'] = mfa_device['SerialNumber']
+
+    response = sts.assume_role(**assume_role_args)
+
+    if not response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        raise RuntimeError(f"assume role API call returned HTTP Status Code: "
+                           "{response['ResponseMetadata']['HTTPStatusCode']}")
+
+    if not 'Credentials' in response:
+        raise RuntimeError("Unable to Assume Role")
+    
+    return response['Credentials']
+
+def prompt(config_alias):
+    if 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ and config_alias:
+        print(f"aws: {config_alias} until {os.environ['ROLE_ASSUMED_UNTIL']}")
+    elif 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ:
+        print(f"aws: {os.environ['ROLE_ASSUMED']} until {os.environ['ROLE_ASSUMED_UNTIL']}")
+
+def usage():
+    print("usage:")
+    print(f"    {sys.argv[0]} role_alias [mfacode]")
+    print(f"    {sys.argv[0]} --prompt")
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2 and sys.argv[1] == '--prompt':
+        prompt(os.environ.get('ROLE_ALIAS', None))
+    elif len(sys.argv) == 2:
+        main(sys.argv[1], None)
+    elif len(sys.argv) == 3:
+        main(sys.argv[1], sys.argv[2])
+    else:
+        usage()
