@@ -39,7 +39,11 @@ def resolve_config(config_alias):
     return config
 
 def main(config_alias, mfa_code=None):
-    config = resolve_config(config_alias)
+    try:
+        config = resolve_config(config_alias)
+    except FileNotFoundError:
+        print(f'unable to locate asmrl configuration file')
+        sys.exit(-1)
 
     profile = 'default'
     if 'profile' in config:
@@ -50,8 +54,8 @@ def main(config_alias, mfa_code=None):
     region = DEFAULT_REGION
     if 'region' in config:
         region = config['region']
-    if 'aws_DEFAULT_REGION' in os.environ:
-        region = os.environ['aws_DEFAULT_REGION']
+    if 'AWS_DEFAULT_REGION' in os.environ:
+        region = os.environ['AWS_DEFAULT_REGION']
 
     sts_endpoint = DEFAULT_STS_ENDPOINT
     if 'sts_endpoint' in config:
@@ -61,6 +65,9 @@ def main(config_alias, mfa_code=None):
 
     try:
         credentials = assume_role(profile, role, mfa_code, region, str(uuid.uuid4()), sts_endpoint, DEFAULT_DURATION)
+    except botocore.exceptions.PartialCredentialsError:
+        print(f"Unable to locate complete credential set", file=sys.stderr)
+        sys.exit(-1)
     except botocore.exceptions.ProfileNotFound:
         print(f"Unable to locate profile: {profile}", file=sys.stderr)
         sys.exit(-1)
