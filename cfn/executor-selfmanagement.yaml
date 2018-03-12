@@ -1,6 +1,22 @@
 Description: "Defines group for MFA self-management: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_delegate-permissions_examples.html"
 
+Outputs:
+  IAMSelfManagementGroup:
+    Value: !Ref "IAMSelfManagementGroup"
+  ExecutorAdminGroup:
+    Value: !Ref "ExecutorAdminGroup"
+  IAMSelfManagementPolicy:
+    Value: !Ref "IAMSelfManagementPolicy"
+
 Resources:
+  ExecutorAdminGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "ExecutorAccountAdmin"
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+
   IAMSelfManagementGroup:
     Type: "AWS::IAM::Group"
     Properties:
