@@ -7,6 +7,18 @@ Parameters:
     Type: "String"
     Default: "managed-0"
 
+Outputs:
+  ReadOnlyGroup:
+    Value: !Ref "ReadOnly"
+  ReadOnlyAppGroup:
+    Value: !Ref "ReadOnlyApp"
+  AdminGroup:
+    Value: !Ref "Admin"
+  ReadOnlyRole:
+    Value: !Sub "arn:aws:iam::${ManagedAccountId}:role/ReadOnly"
+  AdminRole:
+    Value: !Sub "arn:aws:iam::${ManagedAccountId}:role/Admin"
+
 Resources:
   ReadOnly:
     Type: "AWS::IAM::Group"
