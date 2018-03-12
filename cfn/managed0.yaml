@@ -7,6 +7,12 @@ Parameters:
     Type: "String"
     Default: "0123456789"
 
+Outputs:
+  AdminRoleARN:
+    Value: !GetAtt "AdminAccess.Arn"
+  ReadOnlyRoleARN:
+    Value: !GetAtt "ReadOnlyAccess.Arn"
+
 Resources:
   ReadOnlyAccess:
     Type: "AWS::IAM::Role"
