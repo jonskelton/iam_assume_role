@@ -9,6 +9,7 @@
     :license: BDS, see LICENSE for mor details.
 """
 
+from dateutil.parser import parse
 from pathlib import Path
 
 import botocore
@@ -41,6 +42,9 @@ def resolve_config(config_alias):
 def main(config_alias, mfa_code=None):
     try:
         config = resolve_config(config_alias)
+    except KeyError:
+        print(f'unable to locate configuration {config_alias} in asmrl configuration file')
+        sys.exit(-1)
     except FileNotFoundError:
         print(f'unable to locate asmrl configuration file')
         sys.exit(-1)
@@ -84,7 +88,7 @@ def main(config_alias, mfa_code=None):
     print(f"export AWS_SECRET_ACCESS_KEY={credentials['SecretAccessKey']}")
     print(f"export AWS_SESSION_TOKEN={credentials['SessionToken']}")
     print(f"export ROLE_ASSUMED={role}")
-    print(f"export ROLE_ASSUMED_UNTIL={str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).time())}")
+    print(f"export ROLE_ASSUMED_UNTIL={str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
     print(f"export ROLE_ALIAS={config_alias}")
 
 def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
@@ -133,11 +137,13 @@ def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endp
     
     return response['Credentials']
 
-def prompt(config_alias):
-    if 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ and config_alias:
-        print(f"aws: {config_alias} until {os.environ['ROLE_ASSUMED_UNTIL']}")
-    elif 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ:
-        print(f"aws: {os.environ['ROLE_ASSUMED']} until {os.environ['ROLE_ASSUMED_UNTIL']}")
+def prompt():
+    if 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ:
+        expiration = parse(os.environ['ROLE_ASSUMED_UNTIL'])
+        if expiration > datetime.datetime.now(LOCAL_TIMEZONE):
+            print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} until {expiration.time()}")
+        else:
+            print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} EXPIRED")
 
 def usage():
     print("usage:")
@@ -146,7 +152,7 @@ def usage():
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == '--prompt':
-        prompt(os.environ.get('ROLE_ALIAS', None))
+        prompt()
     elif len(sys.argv) == 2:
         main(sys.argv[1], None)
     elif len(sys.argv) == 3:
