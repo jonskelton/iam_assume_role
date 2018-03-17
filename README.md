@@ -4,47 +4,71 @@ Overview Diagram:
 
 [Assumerole0]: https://raw.githubusercontent.com/jonskelton/iam_assume_role/master/assets/AssumeRole0.png
 
-Download the assume-role  utility: https://raw.githubusercontent.com/jonskelton/assume-role/master/assume-role
+Download the asmrl utility: https://raw.githubusercontent.com/jonskelton/iam_assume_role/master/bin/asmrl
 
-Review documentation: https://github.com/coinbase/assume-role
+AWS Environment Configuration:
 
-Account configuration:
+Profiles are supported.
 
-~/.aws/accounts
-```{r, engine='json', count_lines}
-{
-    "executor-0": 0123456789
-    "managed-0": 9876543210
-}
+~/.aws/config:
 ```
+[default]
+region=us-west-2
 
-Credential configuration:
+[profile profilename0]
+output=json
+```
+AWS Credentials:
+
+AWS API access credentials for the user's IAM account in the Executor AWS account.
 
 ~/.aws/credentials:
 ```
 [default]
 aws_access_key_id = AKIADEMODEMODEMO
 aws_secret_key_key = sanitizedkeysanitizedkeysanitizedkey
+
+[profilename0]
+aws_access_key_id = AKIAPROFILENAME0DEMO
+aws_secret_key_key = profilename0sanitizedkeysanitizedkey
 ```
 
-Bash prompt via ~/.bashrc:
+The asmrl utility may be configured via its own configuratin file.
 
-```{r, engine='bash', count_lines}
-function aws_account_info {
-  [ "$AWS_ACCOUNT_NAME" ] && [ "$AWS_ACCOUNT_ROLE" ] && echo "aws:($AWS_ACCOUNT_ROLE@$AWS_ACCOUNT_NAME) "
+~/.aws/asmrl.conf:
+```
+{ 
+  "defaults": {
+    "profile": "default",
+    "region": "us-west-2"
+  },
+  "readonly@managed0": {
+    "profile": "profilename0",
+    "role": "arn:aws:iam::9876543210:role/ReadOnly"
+  },
+  "admin@managed0": {
+    "profile": "profilename0",
+    "role": "arn:aws:iam::9876543210:role/Admin"
+  }
 }
-PROMPT_COMMAND='aws_account_info'
 ```
 
-Bash function wrapper example:
+Bash configuration via ~/.bashrc:
+```{r, engine='bash'}
+PROMPT_COMMAND='asmrl --prompt'
 
-```{r, engine='bash', count_lines}
-function admin@managed-0() {
-    eval $(assume-role managed-0 Admin $1)
+function readonly@managed0() {
+    eval $(asmrl readonly@managed0 $1)
 }
 
-$ admin@managed-0 6DIGITMFACODE
-Success! IAM session envars are exported.
-aws:(Admin@managed-0) 
+function admin@managed0() {
+    eval $(asmrl admin@managed0 $1)
+}
+```
+
+CLI example:
+```{r, engine='bash'}
+$ admin@managed0 6DIGITMFACODE
+aws: admin@managed0 until 17:59:33
 $ 
 ```
