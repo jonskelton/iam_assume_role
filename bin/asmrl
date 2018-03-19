@@ -68,7 +68,9 @@ def main(config_alias, mfa_code=None):
     role = config['role']
 
     try:
-        credentials = assume_role(profile, role, mfa_code, region, str(uuid.uuid4()), sts_endpoint, DEFAULT_DURATION)
+        credentials = assume_role(profile, role, mfa_code, region,
+                                  str(uuid.uuid4()), sts_endpoint,
+                                  DEFAULT_DURATION)
     except botocore.exceptions.PartialCredentialsError:
         print(f"Unable to locate complete credential set", file=sys.stderr)
         sys.exit(-1)
@@ -88,7 +90,8 @@ def main(config_alias, mfa_code=None):
     print(f"export AWS_SECRET_ACCESS_KEY={credentials['SecretAccessKey']}")
     print(f"export AWS_SESSION_TOKEN={credentials['SessionToken']}")
     print(f"export ROLE_ASSUMED={role}")
-    print(f"export ROLE_ASSUMED_UNTIL={str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
+    print(f"export ROLE_ASSUMED_UNTIL="
+          "{str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
     print(f"export ROLE_ALIAS={config_alias}")
 
 def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
@@ -134,14 +137,15 @@ def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endp
 
     if not 'Credentials' in response:
         raise RuntimeError("Unable to Assume Role")
-    
+
     return response['Credentials']
 
 def prompt():
     if 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ:
         expiration = parse(os.environ['ROLE_ASSUMED_UNTIL'])
         if expiration > datetime.datetime.now(LOCAL_TIMEZONE):
-            print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} until {expiration.time()}")
+            print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} "
+                  "until {expiration.time()}")
         else:
             print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} EXPIRED")
 
