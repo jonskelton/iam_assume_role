@@ -91,7 +91,7 @@ def main(config_alias, mfa_code=None):
     print(f"export AWS_SESSION_TOKEN={credentials['SessionToken']}")
     print(f"export ROLE_ASSUMED={role}")
     print(f"export ROLE_ASSUMED_UNTIL="
-          "{str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
+          f"{str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
     print(f"export ROLE_ALIAS={config_alias}")
 
 def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
