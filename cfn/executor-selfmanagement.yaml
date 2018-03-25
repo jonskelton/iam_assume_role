@@ -5,6 +5,8 @@ Outputs:
     Value: !Ref "IAMSelfManagementGroup"
   ExecutorAdminGroup:
     Value: !Ref "ExecutorAdminGroup"
+  AdminAccessRoleARN:
+    Value: !GetAtt "AdminAccessRole.Arn"
   IAMSelfManagementPolicy:
     Value: !Ref "IAMSelfManagementPolicy"
 
@@ -14,8 +16,43 @@ Resources:
     Properties:
       GroupName: "ExecutorAccountAdmin"
       Path: "/"
+      Policies: 
+      - PolicyName: "ExecutorAdmin"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:role/Admin"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 7200
+
+  AdminAccessRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "Admin"
+      Path: "/"
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/AdministratorAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              "AWS": !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action:
+              - "sts:AssumeRole"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 7200
 
   IAMSelfManagementGroup:
     Type: "AWS::IAM::Group"
