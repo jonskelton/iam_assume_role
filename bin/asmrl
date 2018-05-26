@@ -21,7 +21,7 @@ import sys
 import os
 
 DEFAULT_REGION = 'us-west-2'
-DEFAULT_DURATION = 3600
+DEFAULT_DURATION = 14400
 DEFAULT_STS_ENDPOINT = 'https://sts.us-west-2.amazonaws.com'
 
 LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
@@ -145,7 +145,7 @@ def prompt():
         expiration = parse(os.environ['ROLE_ASSUMED_UNTIL'])
         if expiration > datetime.datetime.now(LOCAL_TIMEZONE):
             print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} "
-                  "until {expiration.time()}")
+                  f"until {expiration.time()}")
         else:
             print(f"aws: {os.environ.get('ROLE_ALIAS', os.environ.get('ROLE_ASSUMED'))} EXPIRED")
 
