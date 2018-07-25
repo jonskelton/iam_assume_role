@@ -20,12 +20,33 @@ Outputs:
     Value: !Sub "arn:aws:iam::${ManagedAccountId}:role/Admin"
 
 Resources:
+  ViewOnly:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: !Sub "${ManagedAccountName}.ViewOnly"
+      Path: "/"
+      Policies:
+      - PolicyName: !Sub "${ManagedAccountName}.ViewOnly"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Resource:
+            - !Sub "arn:aws:iam::${ManagedAccountId}:role/ViewOnly"
+            Condition:
+              Bool:
+                aws:SecureTransport: True
+                aws:MultiFactorAuthPresent: True
+              NumericLessThan:
+                aws:MultiFactorAuthAge: 32400
+
   ReadOnly:
     Type: "AWS::IAM::Group"
-    Properties: 
+    Properties:
       GroupName: !Sub "${ManagedAccountName}.ReadOnly"
       Path: "/"
-      Policies: 
+      Policies:
       - PolicyName: !Sub "${ManagedAccountName}.ReadOnly"
         PolicyDocument:
           Version: "2012-10-17"
@@ -43,10 +64,10 @@ Resources:
 
   ReadOnlyApp:
     Type: "AWS::IAM::Group"
-    Properties: 
+    Properties:
       GroupName: !Sub "${ManagedAccountName}.ReadOnlyApp"
       Path: "/"
-      Policies: 
+      Policies:
       - PolicyName: !Sub "${ManagedAccountName}.ReadOnlyApp"
         PolicyDocument:
           Version: "2012-10-17"
@@ -61,10 +82,10 @@ Resources:
 
   Admin:
     Type: "AWS::IAM::Group"
-    Properties: 
+    Properties:
       GroupName: !Sub "${ManagedAccountName}.Admin"
       Path: "/"
-      Policies: 
+      Policies:
       - PolicyName: !Sub "${ManagedAccountName}.Admin"
         PolicyDocument:
           Version: "2012-10-17"

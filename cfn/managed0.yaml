@@ -14,13 +14,29 @@ Outputs:
     Value: !GetAtt "ReadOnlyAccess.Arn"
 
 Resources:
+  ViewOnlyAccess:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "ViewOnly"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+            Action:
+              - "sts:AssumeRole"
+
   ReadOnlyAccess:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName: "ReadOnly"
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
+        - "arn:aws:iam::aws:policy/ReadOnlyAccess"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
