@@ -30,12 +30,13 @@ Resources:
                 aws:SecureTransport: True
                 aws:MultiFactorAuthPresent: True
               NumericLessThan:
-                aws:MultiFactorAuthAge: 14400
+                aws:MultiFactorAuthAge: 7200
 
   AdminAccessRole:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName: "Admin"
+      MaxSessionDuration: 7200
       Path: "/"
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/AdministratorAccess"
@@ -52,7 +53,7 @@ Resources:
                 aws:SecureTransport: True
                 aws:MultiFactorAuthPresent: True
               NumericLessThan:
-                aws:MultiFactorAuthAge: 14400
+                aws:MultiFactorAuthAge: 7200
 
   IAMSelfManagementGroup:
     Type: "AWS::IAM::Group"
