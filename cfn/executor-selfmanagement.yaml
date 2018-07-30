@@ -30,7 +30,7 @@ Resources:
                 aws:SecureTransport: True
                 aws:MultiFactorAuthPresent: True
               NumericLessThan:
-                aws:MultiFactorAuthAge: 7200
+                aws:MultiFactorAuthAge: 14400
 
   AdminAccessRole:
     Type: "AWS::IAM::Role"
@@ -52,7 +52,7 @@ Resources:
                 aws:SecureTransport: True
                 aws:MultiFactorAuthPresent: True
               NumericLessThan:
-                aws:MultiFactorAuthAge: 7200
+                aws:MultiFactorAuthAge: 14400
 
   IAMSelfManagementGroup:
     Type: "AWS::IAM::Group"

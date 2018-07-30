@@ -66,4 +66,4 @@ Resources:
                 aws:SecureTransport: True
                 aws:MultiFactorAuthPresent: True
               NumericLessThan:
-                aws:MultiFactorAuthAge: 7200
+                aws:MultiFactorAuthAge: 14400
