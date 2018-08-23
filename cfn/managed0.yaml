@@ -3,70 +3,70 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "Grants standard set of AssumeRole permissions for managed accounts"
 
 Parameters:
-  ExecutorAccountId:
-    Type: "String"
-    Default: "0123456789"
+    ExecutorAccountId:
+        Type: "String"
+        Default: "0123456789"
 
 Outputs:
-  AdminRoleARN:
-    Value: !GetAtt "AdminAccess.Arn"
-  ReadOnlyRoleARN:
-    Value: !GetAtt "ReadOnlyAccess.Arn"
+    AdminRoleARN:
+        Value: !GetAtt "AdminAccess.Arn"
+    ReadOnlyRoleARN:
+        Value: !GetAtt "ReadOnlyAccess.Arn"
 
 Resources:
-  ViewOnlyAccess:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: "ViewOnly"
-      MaxSessionDuration: 14400
-      Path: "/"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-            Action:
-              - "sts:AssumeRole"
+    ViewOnlyAccess:
+        Type: "AWS::IAM::Role"
+        Properties:
+            RoleName: "ViewOnly"
+            MaxSessionDuration: 14400
+            Path: "/"
+            ManagedPolicyArns:
+                - "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: "Allow"
+                        Principal:
+                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                        Action:
+                            - "sts:AssumeRole"
 
-  ReadOnlyAccess:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: "ReadOnly"
-      MaxSessionDuration: 14400
-      Path: "/"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/ReadOnlyAccess"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-            Action:
-              - "sts:AssumeRole"
+    ReadOnlyAccess:
+        Type: "AWS::IAM::Role"
+        Properties:
+            RoleName: "ReadOnly"
+            MaxSessionDuration: 14400
+            Path: "/"
+            ManagedPolicyArns:
+                - "arn:aws:iam::aws:policy/ReadOnlyAccess"
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: "Allow"
+                        Principal:
+                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                        Action:
+                            - "sts:AssumeRole"
 
-  AdminAccess:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: "Admin"
-      MaxSessionDuration: 14400
-      Path: "/"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AdministratorAccess"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-            Action:
-              - "sts:AssumeRole"
-            Condition:
-              Bool:
-                aws:SecureTransport: True
-                aws:MultiFactorAuthPresent: True
-              NumericLessThan:
-                aws:MultiFactorAuthAge: 14400
+    AdminAccess:
+        Type: "AWS::IAM::Role"
+        Properties:
+            RoleName: "Admin"
+            MaxSessionDuration: 14400
+            Path: "/"
+            ManagedPolicyArns:
+                - "arn:aws:iam::aws:policy/AdministratorAccess"
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: "Allow"
+                        Principal:
+                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                        Action:
+                            - "sts:AssumeRole"
+                        Condition:
+                            Bool:
+                                aws:SecureTransport: True
+                                aws:MultiFactorAuthPresent: True
+                            NumericLessThan:
+                                aws:MultiFactorAuthAge: 14400
