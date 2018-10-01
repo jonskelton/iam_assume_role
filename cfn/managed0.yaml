@@ -26,10 +26,10 @@ Resources:
                 Version: "2012-10-17"
                 Statement:
                     - Effect: "Allow"
-                        Principal:
-                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-                        Action:
-                            - "sts:AssumeRole"
+                      Principal:
+                          "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                      Action:
+                          - "sts:AssumeRole"
 
     ReadOnlyAccess:
         Type: "AWS::IAM::Role"
@@ -43,10 +43,10 @@ Resources:
                 Version: "2012-10-17"
                 Statement:
                     - Effect: "Allow"
-                        Principal:
-                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-                        Action:
-                            - "sts:AssumeRole"
+                      Principal:
+                          "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                      Action:
+                          - "sts:AssumeRole"
 
     AdminAccess:
         Type: "AWS::IAM::Role"
@@ -60,13 +60,13 @@ Resources:
                 Version: "2012-10-17"
                 Statement:
                     - Effect: "Allow"
-                        Principal:
-                            "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
-                        Action:
-                            - "sts:AssumeRole"
-                        Condition:
-                            Bool:
-                                aws:SecureTransport: True
-                                aws:MultiFactorAuthPresent: True
-                            NumericLessThan:
-                                aws:MultiFactorAuthAge: 14400
+                      Principal:
+                          "AWS": !Sub "arn:aws:iam::${ExecutorAccountId}:root"
+                      Action:
+                          - "sts:AssumeRole"
+                      Condition:
+                          Bool:
+                              aws:SecureTransport: True
+                              aws:MultiFactorAuthPresent: True
+                          NumericLessThan:
+                              aws:MultiFactorAuthAge: 14400
