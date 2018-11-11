@@ -21,7 +21,8 @@ Resources:
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
-          - Effect: "Allow"
+          - Sid: "AllowMembersAssumeAdminrole"
+            Effect: "Allow"
             Action: "sts:AssumeRole"
             Resource:
             - !Sub "arn:aws:iam::${AWS::AccountId}:role/Admin"
@@ -108,6 +109,7 @@ Resources:
             - "iam:UpdateAccessKey"
             - "iam:CreateAccessKey"
             - "iam:ListAccessKeys"
+            - "iam:GetAccessKeyLastUsed"
             Resource:
             - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
             Condition:
@@ -120,10 +122,66 @@ Resources:
             - "iam:GetAccountPasswordPolicy"
             Resource: "*"
 
-          - Sid: "AllowMFAdUserToChangeTheirPassword"
+          - Sid: "AllowMFAdUserToManageTheirPassword"
             Effect: "Allow"
             Action:
             - "iam:ChangePassword"
+            - "iam:GetLoginProfile"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowMFAdUserManageSSHKeys"
+            Effect: "Allow"
+            Action:
+            - "iam:ListSSHPublicKeys"
+            - "iam:DeleteSSHPublicKey"
+            - "iam:GetSSHPublicKey"
+            - "iam:UploadSSHPublicKey"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowMFAdUserManageSigningCertificates"
+            Effect: "Allow"
+            Action:
+            - "iam:ListSigningCertificates"
+            - "iam:DeleteSigningCertificate"
+            - "iam:UploadSigningCertificate"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowMFAdUserManageServiceSpecificCredentials"
+            Effect: "Allow"
+            Action:
+            - "iam:ListServiceSpecificCredentials"
+            Resource:
+            - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowMFAdUserListAllGroups"
+            Effect: "Allow"
+            Action:
+            - "iam:ListGroups"
+            Resource:
+            - "*"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": "True"
+
+          - Sid: "AllowMFAdUserListOwnGroups"
+            Effect: "Allow"
+            Action:
+            - "iam:ListGroupsForUser"
             Resource:
             - !Sub "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
             Condition:
