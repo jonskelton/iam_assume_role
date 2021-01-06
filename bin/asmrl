@@ -78,10 +78,14 @@ def main(config_alias, mfa_code=None):
         print(f"Unable to locate profile: {profile}", file=sys.stderr)
         sys.exit(-1)
     except botocore.exceptions.ClientError as bece:
+        if mfa_code is None:
+            print("No MFA code provided", file=sys.stderr)
         print("Unable to assume role", file=sys.stderr)
         print(bece, file=sys.stderr)
         sys.exit(-1)
     except RuntimeError as arre:
+        if mfa_code is None:
+            print("No MFA code provided", file=sys.stderr)
         print("Unable to assume role", file=sys.stderr)
         print(arre, file=sys.stderr)
         sys.exit(-1)
@@ -93,6 +97,7 @@ def main(config_alias, mfa_code=None):
     print(f"export ROLE_ASSUMED_UNTIL="
           f"{str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
     print(f"export ROLE_ALIAS={config_alias}")
+    print("# if running this interactively then you need to source or manually export the above variables")
 
 def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
     os.environ.pop('AWS_ACCESS_KEY_ID', None)
@@ -140,6 +145,9 @@ def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endp
 
     return response['Credentials']
 
+def whoami():
+    os.system('aws sts get-caller-identity')
+
 def prompt():
     if 'ROLE_ASSUMED' in os.environ and 'ROLE_ASSUMED_UNTIL' in os.environ:
         expiration = parse(os.environ['ROLE_ASSUMED_UNTIL'])
@@ -153,10 +161,13 @@ def usage():
     print("usage:")
     print(f"    {sys.argv[0]} role_alias [mfacode]")
     print(f"    {sys.argv[0]} --prompt")
+    print(f"    {sys.argv[0]} --whoami")
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == '--prompt':
         prompt()
+    if len(sys.argv) == 2 and sys.argv[1] == '--whoami':
+        whoami()
     elif len(sys.argv) == 2:
         main(sys.argv[1], None)
     elif len(sys.argv) == 3:
