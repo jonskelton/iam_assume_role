@@ -78,10 +78,14 @@ def main(config_alias, mfa_code=None):
         print(f"Unable to locate profile: {profile}", file=sys.stderr)
         sys.exit(-1)
     except botocore.exceptions.ClientError as bece:
+        if mfa_code is None:
+            print("No MFA code provided")
         print("Unable to assume role", file=sys.stderr)
         print(bece, file=sys.stderr)
         sys.exit(-1)
     except RuntimeError as arre:
+        if mfa_code is None:
+            print("No MFA code provided")
         print("Unable to assume role", file=sys.stderr)
         print(arre, file=sys.stderr)
         sys.exit(-1)
