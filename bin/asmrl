@@ -97,6 +97,7 @@ def main(config_alias, mfa_code=None):
     print(f"export ROLE_ASSUMED_UNTIL="
           f"{str(credentials['Expiration'].astimezone(LOCAL_TIMEZONE).isoformat())}")
     print(f"export ROLE_ALIAS={config_alias}")
+    print("# if running this interactively then you need to source or manually export the above variables")
 
 def assume_role(profile, role_arn, mfa_code, region, role_session_name, sts_endpoint, duration):
     os.environ.pop('AWS_ACCESS_KEY_ID', None)
