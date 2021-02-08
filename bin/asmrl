@@ -20,9 +20,9 @@ import json
 import sys
 import os
 
-DEFAULT_REGION = 'us-west-2'
-DEFAULT_DURATION = 14400
-DEFAULT_STS_ENDPOINT = 'https://sts.us-west-2.amazonaws.com'
+DEFAULT_REGION = 'us-east-1'
+DEFAULT_DURATION = 3600
+DEFAULT_STS_ENDPOINT = 'https://sts.us-east-1.amazonaws.com'
 
 LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
@@ -166,7 +166,7 @@ def usage():
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == '--prompt':
         prompt()
-    if len(sys.argv) == 2 and sys.argv[1] == '--whoami':
+    elif len(sys.argv) == 2 and sys.argv[1] == '--whoami':
         whoami()
     elif len(sys.argv) == 2:
         main(sys.argv[1], None)
